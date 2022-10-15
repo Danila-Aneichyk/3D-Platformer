@@ -7,12 +7,18 @@ public class PlayerMovement : MonoBehaviour
     [Header("Base Settings")]
     [SerializeField] private float _speed = 3f;
     [SerializeField] private CharacterController _characterController;
-    [SerializeField] private float _gravityMultiplier = 1f; 
+    [SerializeField] private float _gravityMultiplier = 1f;
 
     [Header("Grounded")]
     [SerializeField] private Transform _checkGroundTransform;
     [SerializeField] private float _checkGroundedRadius;
-    [SerializeField] private LayerMask _checkGroundMask; 
+    [SerializeField] private LayerMask _checkGroundMask;
+
+    [Header("Jump")]
+    [SerializeField] private float _jumpHeight = 2f;
+
+    private Vector3 _fallVector;
+
     #endregion
 
 
@@ -31,11 +37,21 @@ public class PlayerMovement : MonoBehaviour
 
         bool isGrounded = Physics.CheckSphere(_checkGroundTransform.position, _checkGroundedRadius, _checkGroundMask);
         Debug.Log($"IsGrounded {isGrounded}");
+
+        if (isGrounded && _fallVector.y < 0)
+        {
+            _fallVector.y = 0;
+        }
         
-        Vector3 fallVector = Vector3.zero;
         float gravity = Physics.gravity.y * _gravityMultiplier;
-        fallVector.y += gravity * Time.deltaTime;
-        _characterController.Move(fallVector);
+        
+        if (isGrounded && Input.GetButtonDown("Jump"))
+        {
+            _fallVector.y = Mathf.Sqrt(_jumpHeight * -2f * gravity);
+        }
+
+        _fallVector.y += gravity * Time.deltaTime;
+        _characterController.Move(_fallVector * Time.deltaTime);
     }
 
     #endregion
