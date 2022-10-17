@@ -51,7 +51,9 @@ namespace Platformer3D.Game
             sequence.Append(transform
                 .DOMove(_fromTransform.position, _duration)
                 .SetEase(_ease));
-            sequence.SetLoops(-1);
+            sequence
+                .SetLoops(-1)
+                .SetUpdate(UpdateType.Fixed);
 
             _tween = sequence; 
         }
