@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using DG.Tweening;
 using UnityEngine;
 
@@ -8,17 +10,16 @@ namespace Platformer3D.Game
     {
         #region Variables
 
-        [SerializeField] private Transform _fromTransform;
-        [SerializeField] private Transform _toTransform;
+        [SerializeField] private bool _needPlayOnStart = true;
+        [SerializeField] private bool _isLoop; 
+        [SerializeField] private List<Transform> _points;
+
         [SerializeField] private float _duration = 1f;
-        [SerializeField] private float _delayInFromPosition = 1f; 
-        [SerializeField] private float _delayInToPosition = 1f; 
+        [SerializeField] private float _delayInPosition = 1f;
         [SerializeField] private Ease _ease;
 
         private Tween _tween;
-        public Transform FromTransform => _fromTransform;
-
-        public Transform ToTransform => _toTransform;
+        public List<Transform> Points => _points;
 
         #endregion
 
@@ -27,36 +28,60 @@ namespace Platformer3D.Game
 
         private void Awake()
         {
-            transform.position = _fromTransform.position; 
+            if (IsValid())
+                return;
+            transform.position = _points.First().position;
         }
 
         private void Start()
         {
-            Play();
+            if (IsValid())
+                return;
+            if(_needPlayOnStart)
+                Move();
         }
 
         #endregion
+
+
         #region Public methods
 
-        public void Play()
+        public void Move()
         {
             _tween?.Kill();
 
             Sequence sequence = DOTween.Sequence();
-            sequence.AppendInterval(_delayInFromPosition); 
-            sequence.Append(_tween = transform
-                .DOMove(_toTransform.position, _duration)
-                .SetEase(_ease));
-            sequence.AppendInterval(_delayInToPosition);
+
+            for (int i = 1; i < _points.Count; i++)
+            {
+                Transform point = _points[i];
+                sequence.AppendInterval(_delayInPosition);
+                sequence.Append(_tween = transform
+                    .DOMove(point.position, _duration)
+                    .SetEase(_ease));
+            }
+
+            sequence.AppendInterval(_delayInPosition);
             sequence.Append(transform
-                .DOMove(_fromTransform.position, _duration)
+                .DOMove(_points.First().position, _duration)
                 .SetEase(_ease));
             sequence
-                .SetLoops(-1)
                 .SetUpdate(UpdateType.Fixed);
+            if (_isLoop)
+            {
+                sequence.SetLoops(-1);
+            }
 
-            _tween = sequence; 
+            _tween = sequence;
         }
+
+        #endregion
+
+
+        #region Private methods
+
+        private bool IsValid() =>
+            _points != null && _points.Count > 1;
 
         #endregion
     }

@@ -1,5 +1,4 @@
-﻿using Unity.VisualScripting;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 
 namespace Platformer3D.Game.Objects
@@ -14,19 +13,35 @@ namespace Platformer3D.Game.Objects
                 return;
 
 
-            if (movingObject.FromTransform == null || movingObject.ToTransform == null)
+            if (!IsNotValid(movingObject))
             {
                 return;
             }
 
             Gizmos.color = Color.blue;
-            var fromTransformPosition = movingObject.FromTransform.position;
-            var toTransformPosition = movingObject.ToTransform.position;
-            Gizmos.DrawSphere(fromTransformPosition, 0.1f);
-            Gizmos.DrawSphere(toTransformPosition, 0.1f);
+
+            foreach (Transform point in movingObject.Points)
+            {
+                Gizmos.DrawSphere(point.position, 0.1f);
+                
+            }
 
             Gizmos.color = Color.green;
-            Gizmos.DrawLine(fromTransformPosition, toTransformPosition);
+            
+            Transform previousPoint = movingObject.Points.First(); 
+            for (int i = 1; i < movingObject.Points.Count; i++)
+            {
+                Transform point = movingObject.Points[i];
+                Gizmos.DrawLine(previousPoint.position, point.position);
+                previousPoint = point; 
+            }
+            
+            Gizmos.DrawLine(previousPoint.position, movingObject.Points.First().position);
+        }
+
+        private static bool IsNotValid(MovingObject movingObject)
+        {
+            return movingObject.Points == null || movingObject.Points.Count < 2;
         }
 
         private static bool ShouldDraw(MovingObject movingObject, GizmoType gizmoType)
@@ -54,7 +69,7 @@ namespace Platformer3D.Game.Objects
             MovingObject movingObject = (MovingObject) target; 
             if (GUILayout.Button($"Test Button"))
             {
-                movingObject.Play();
+                movingObject.Move();
             }
                 
         }
