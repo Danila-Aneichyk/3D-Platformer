@@ -9,7 +9,8 @@ namespace Platformer3D.Game
         [SerializeField] private List<Transform> _points;
 
         [Header("Initial Settings")]
-        [SerializeField] private bool _needPlayOnStart = true;
+        [SerializeField]
+        public bool _needPlayOnStart = true;
         [SerializeField] private bool _isLoop = true;
 
         [Header("Animation Settings")]
