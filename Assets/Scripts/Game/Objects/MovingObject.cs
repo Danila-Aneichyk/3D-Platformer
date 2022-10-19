@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 
@@ -8,47 +6,41 @@ namespace Platformer3D.Game
 {
     public class MovingObject : MonoBehaviour
     {
-        #region Variables
-
-        [SerializeField] private bool _needPlayOnStart = true;
-        [SerializeField] private bool _isLoop; 
         [SerializeField] private List<Transform> _points;
 
-        [SerializeField] private float _duration = 1f;
+        [Header("Initial Settings")]
+        [SerializeField] private bool _needPlayOnStart = true;
+        [SerializeField] private bool _isLoop = true;
+
+        [Header("Animation Settings")]
         [SerializeField] private float _delayInPosition = 1f;
+        [SerializeField] private float _duration = 1f;
         [SerializeField] private Ease _ease;
 
         private Tween _tween;
+
         public List<Transform> Points => _points;
-
-        #endregion
-
-
-        #region Unity lifecycle
 
         private void Awake()
         {
-            if (IsValid())
+            if (!IsValid())
                 return;
+
             transform.position = _points.First().position;
         }
 
         private void Start()
         {
-            if (IsValid())
+            if (!IsValid())
                 return;
-            if(_needPlayOnStart)
+
+            if (_needPlayOnStart)
                 Move();
         }
 
-        #endregion
-
-
-        #region Public methods
-
         public void Move()
         {
-            _tween?.Kill();
+            _tween?.Kill(true);
 
             Sequence sequence = DOTween.Sequence();
 
@@ -56,7 +48,7 @@ namespace Platformer3D.Game
             {
                 Transform point = _points[i];
                 sequence.AppendInterval(_delayInPosition);
-                sequence.Append(_tween = transform
+                sequence.Append(transform
                     .DOMove(point.position, _duration)
                     .SetEase(_ease));
             }
@@ -65,24 +57,17 @@ namespace Platformer3D.Game
             sequence.Append(transform
                 .DOMove(_points.First().position, _duration)
                 .SetEase(_ease));
+
             sequence
                 .SetUpdate(UpdateType.Fixed);
+
             if (_isLoop)
-            {
                 sequence.SetLoops(-1);
-            }
 
             _tween = sequence;
         }
 
-        #endregion
-
-
-        #region Private methods
-
         private bool IsValid() =>
             _points != null && _points.Count > 1;
-
-        #endregion
     }
 }

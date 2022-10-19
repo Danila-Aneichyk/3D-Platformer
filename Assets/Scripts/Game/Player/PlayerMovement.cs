@@ -20,8 +20,8 @@ namespace Platformer3D.Game
         [SerializeField] private float _jumpHeight = 2f;
 
         private Vector3 _fallVector;
-        private Transform _cachedTransform; 
-
+        private Transform _cachedTransform;
+        private bool _isGrounded; 
         #endregion
 
 
@@ -32,7 +32,7 @@ namespace Platformer3D.Game
             _cachedTransform = transform; 
         }
 
-        private void Update()
+        private void FixedUpdate()
         {
             float horizontal = Input.GetAxis("Horizontal");
             float vertical = Input.GetAxis("Vertical");
@@ -43,17 +43,17 @@ namespace Platformer3D.Game
             _characterController.Move(moveVector);
 
 
-            bool isGrounded = Physics.CheckSphere(_checkGroundTransform.position, _checkGroundedRadius, _checkGroundMask);
-            Debug.Log($"IsGrounded {isGrounded}");
+            _isGrounded = Physics.CheckSphere(_checkGroundTransform.position, _checkGroundedRadius, _checkGroundMask);
+            Debug.Log($"IsGrounded {_isGrounded}");
 
-            if (isGrounded && _fallVector.y < 0)
+            if (_isGrounded && _fallVector.y < 0)
             {
                 _fallVector.y = 0;
             }
         
             float gravity = Physics.gravity.y * _gravityMultiplier;
         
-            if (isGrounded && Input.GetButtonDown("Jump"))
+            if (_isGrounded && Input.GetButtonDown("Jump"))
             {
                 _fallVector.y = Mathf.Sqrt(_jumpHeight * -2f * gravity);
             }
